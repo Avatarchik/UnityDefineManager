@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
-namespace Parabox.Debug.DefineManager
+namespace caneva20.UnityDefineManager.Editor
 {
 	public class ScriptingDefineWindow : EditorWindow
 	{
@@ -13,13 +11,13 @@ namespace Parabox.Debug.DefineManager
 			GetWindow<ScriptingDefineWindow>(true, "Define Symbol Editor", true);
 		}
 
-		Editor m_Editor;
+		UnityEditor.Editor m_Editor;
 		ScriptingDefineObject m_Asset;
 
 		void OnEnable()
 		{
 			m_Asset = ScriptableObject.CreateInstance<ScriptingDefineObject>();
-			m_Editor = Editor.CreateEditor(m_Asset);
+			m_Editor = UnityEditor.Editor.CreateEditor(m_Asset);
 		}
 
 		void OnDisable()

@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace Parabox.Debug.DefineManager
+namespace caneva20.UnityDefineManager.Editor
 {
 	[SuppressMessage("ReSharper", "NotAccessedField.Local")]
 	[SuppressMessage("ReSharper", "InconsistentNaming")]

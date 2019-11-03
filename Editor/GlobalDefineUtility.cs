@@ -1,10 +1,10 @@
-using UnityEditor;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEditor;
 
-namespace Parabox.Debug.DefineManager
+namespace caneva20.UnityDefineManager.Editor
 {
 	enum Compiler
 	{

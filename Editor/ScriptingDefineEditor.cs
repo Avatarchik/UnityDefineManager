@@ -2,10 +2,10 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Parabox.Debug.DefineManager
+namespace caneva20.UnityDefineManager.Editor
 {
 	[CustomEditor(typeof(ScriptingDefineObject))]
-	public class ScriptingDefineEditor : Editor
+	public class ScriptingDefineEditor : UnityEditor.Editor
 	{
 		const int k_CompilerCount = 3;
 		ReorderableList m_ReorderableList;
