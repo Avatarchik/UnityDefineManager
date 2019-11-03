@@ -49,7 +49,7 @@ namespace caneva20.UnityDefineManager.Editor {
 
         private static void Reimport() {
             AssetDatabase.Refresh();
-            
+
             var first = Directory.GetFiles("Assets", "*.cs", SearchOption.AllDirectories).FirstOrDefault();
 
             if (!string.IsNullOrEmpty(first)) {

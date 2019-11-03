@@ -7,30 +7,13 @@ namespace caneva20.UnityDefineManager.Editor {
     [CustomEditor(typeof(ScriptingDefineObject))]
     public class ScriptingDefineEditor : UnityEditor.Editor {
         private const int COMPILER_COUNT = 3;
-        private ReorderableList _reorderableList;
+        private SerializedProperty _buildTarget;
 
         private SerializedProperty _compiler;
-        private SerializedProperty _buildTarget;
+        private BuildTargetGroup _currentTargetGroup;
         private SerializedProperty _defines;
         private SerializedProperty _isApplied;
-        private BuildTargetGroup _currentTargetGroup;
-
-        private static class Styles {
-            public static GUIStyle listContainer;
-            private static bool _isInitialized;
-
-            public static void Init() {
-                if (_isInitialized) {
-                    return;
-                }
-
-                _isInitialized = true;
-
-                listContainer = new GUIStyle {
-                    margin = new RectOffset(4, 4, 4, 4)
-                };
-            }
-        }
+        private ReorderableList _reorderableList;
 
         private void OnEnable() {
             _compiler = serializedObject.FindProperty("_compiler");
@@ -87,7 +70,7 @@ namespace caneva20.UnityDefineManager.Editor {
 
             var defs = GetScriptingDefineSymbols((BuildTargetGroup) _buildTarget.enumValueIndex);
             _defines.arraySize = defs.Length;
-            
+
             for (var i = 0; i < defs.Length; i++) {
                 _defines.GetArrayElementAtIndex(i).stringValue = defs[i];
             }
@@ -185,7 +168,7 @@ namespace caneva20.UnityDefineManager.Editor {
 
                 EditorGUI.BeginChangeCheck();
                 cur = (BuildTargetGroup) EditorGUILayout.EnumPopup(cur);
-                
+
                 if (EditorGUI.EndChangeCheck()) {
                     SetBuildTarget(cur);
                 }
@@ -196,7 +179,7 @@ namespace caneva20.UnityDefineManager.Editor {
             GUILayout.BeginVertical(Styles.listContainer);
 
             _reorderableList.DoLayoutList();
-            
+
             if (EditorGUI.EndChangeCheck()) {
                 _isApplied.boolValue = false;
             }
@@ -220,6 +203,23 @@ namespace caneva20.UnityDefineManager.Editor {
             GUILayout.EndHorizontal();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private static class Styles {
+            public static GUIStyle listContainer;
+            private static bool _isInitialized;
+
+            public static void Init() {
+                if (_isInitialized) {
+                    return;
+                }
+
+                _isInitialized = true;
+
+                listContainer = new GUIStyle {
+                    margin = new RectOffset(4, 4, 4, 4)
+                };
+            }
         }
     }
 }
