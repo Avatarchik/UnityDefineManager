@@ -1,7 +1,6 @@
 {
     "name": "me.caneva20.DefineManager",
     "references": [],
-    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -9,6 +8,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
-    "defineConstraints": []
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
 }
