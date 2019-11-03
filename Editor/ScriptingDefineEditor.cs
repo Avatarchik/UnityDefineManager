@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -67,11 +68,11 @@ namespace caneva20.UnityDefineManager.Editor {
                     ? BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget)
                     : _currentTargetGroup);
             } else {
-                var defs = GlobalDefineUtility.GetDefines((Compiler) _compiler.intValue);
+                var defs = GlobalDefineUtility.GetDefines((Compiler) _compiler.intValue).ToList();
 
-                _defines.arraySize = defs.Length;
+                _defines.arraySize = defs.Count;
 
-                for (var i = 0; i < defs.Length; i++) {
+                for (var i = 0; i < defs.Count; i++) {
                     _defines.GetArrayElementAtIndex(i).stringValue = defs[i];
                 }
 

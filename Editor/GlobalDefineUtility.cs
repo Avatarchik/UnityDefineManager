@@ -11,15 +11,29 @@ namespace caneva20.UnityDefineManager.Editor {
         private const string C_SHARP_PATH = "Assets/mcs.rsp";
         private const string EDITOR_PATH = "Assets/gmcs.rsp";
 
-        public static string[] GetDefines(Compiler compiler) {
+        public static void AddDefine(Compiler compiler, string define) {
+            var defines = GetDefines(compiler).ToList();
+            defines.Add(define);
+
+            SetDefines(compiler, defines);
+        }
+
+        public static void RemoveDefine(Compiler compiler, string define) {
+            var defines = GetDefines(compiler).ToList();
+            defines.Remove(define);
+
+            SetDefines(compiler, defines);
+        }
+
+        public static IEnumerable<string> GetDefines(Compiler compiler) {
             switch (compiler) {
                 case Compiler.CSharp: return ParseRspFile(C_SHARP_PATH);
                 case Compiler.Editor: return ParseRspFile(EDITOR_PATH);
-                default: return null;
+                default: return Enumerable.Empty<string>();
             }
         }
 
-        public static void SetDefines(Compiler compiler, string[] defs) {
+        public static void SetDefines(Compiler compiler, IEnumerable<string> defs) {
             switch (compiler) {
                 case Compiler.CSharp:
                     WriteDefines(C_SHARP_PATH, defs);
@@ -30,14 +44,20 @@ namespace caneva20.UnityDefineManager.Editor {
                     break;
             }
 
+            Reimport();
+        }
+
+        private static void Reimport() {
+            AssetDatabase.Refresh();
+            
             var first = Directory.GetFiles("Assets", "*.cs", SearchOption.AllDirectories).FirstOrDefault();
 
             if (!string.IsNullOrEmpty(first)) {
-                AssetDatabase.ImportAsset(first);
+                AssetDatabase.ImportAsset(first, ImportAssetOptions.ForceUpdate);
             }
         }
 
-        public static string[] ParseRspFile(string path) {
+        private static IEnumerable<string> ParseRspFile(string path) {
             if (!File.Exists(path)) {
                 return new string[0];
             }
@@ -51,11 +71,13 @@ namespace caneva20.UnityDefineManager.Editor {
                 }
             }
 
-            return defs.ToArray();
+            return defs;
         }
 
-        public static void WriteDefines(string path, string[] defs) {
-            if (defs == null || defs.Length < 1 && File.Exists(path)) {
+        private static void WriteDefines(string path, IEnumerable<string> defs) {
+            var defines = defs?.Distinct().ToList() ?? Enumerable.Empty<string>().ToList();
+
+            if (defines.Count <= 0 && File.Exists(path)) {
                 File.Delete(path);
                 File.Delete(path + ".meta");
                 AssetDatabase.Refresh();
@@ -66,10 +88,12 @@ namespace caneva20.UnityDefineManager.Editor {
 
             sb.Append("-define:");
 
-            for (var i = 0; i < defs.Length; i++) {
-                sb.Append(defs[i]);
-                
-                if (i < defs.Length - 1) {
+            for (var i = 0; i < defines.Count; i++) {
+                var value = defines[i].Trim().ToUpper().Replace(" ", "_");
+
+                sb.Append(value);
+
+                if (i < defines.Count - 1) {
                     sb.Append(";");
                 }
             }
