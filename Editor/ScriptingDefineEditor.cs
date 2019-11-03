@@ -2,232 +2,223 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace caneva20.UnityDefineManager.Editor
-{
-	[CustomEditor(typeof(ScriptingDefineObject))]
-	public class ScriptingDefineEditor : UnityEditor.Editor
-	{
-		const int k_CompilerCount = 3;
-		ReorderableList m_ReorderableList;
+namespace caneva20.UnityDefineManager.Editor {
+    [CustomEditor(typeof(ScriptingDefineObject))]
+    public class ScriptingDefineEditor : UnityEditor.Editor {
+        private const int COMPILER_COUNT = 3;
+        private ReorderableList _reorderableList;
 
-//		string[] m_BuildTargetDisplayNames;
-//		BuildTargetGroup[] m_BuildTargetValues;
+        private SerializedProperty _compiler;
+        private SerializedProperty _buildTarget;
+        private SerializedProperty _defines;
+        private SerializedProperty _isApplied;
+        private BuildTargetGroup _currentTargetGroup;
 
-		SerializedProperty m_Compiler;
-		SerializedProperty m_BuildTarget;
-		SerializedProperty m_Defines;
-		SerializedProperty m_IsApplied;
-		BuildTargetGroup m_CurrentTargetGroup;
+        private static class Styles {
+            public static GUIStyle listContainer;
+            private static bool _isInitialized;
 
-		static class Styles
-		{
-			public static GUIStyle listContainer;
-			static bool s_IsInitialized;
+            public static void Init() {
+                if (_isInitialized) {
+                    return;
+                }
 
-			public static void Init()
-			{
-				if (s_IsInitialized)
-					return;
-				s_IsInitialized = true;
-				listContainer = new GUIStyle()
-				{
-					margin = new RectOffset(4, 4, 4, 4)
-				};
-			}
-		}
+                _isInitialized = true;
 
-		void OnEnable()
-		{
-//			m_BuildTargetValues = (BuildTargetGroup[]) System.Enum.GetValues(typeof(BuildTargetGroup));
-//			m_BuildTargetDisplayNames = m_BuildTargetValues.Select(x => x.ToString()).ToArray();
+                listContainer = new GUIStyle {
+                    margin = new RectOffset(4, 4, 4, 4)
+                };
+            }
+        }
 
-			m_Compiler = serializedObject.FindProperty("m_Compiler");
-			SetCompilerTarget((Compiler) m_Compiler.intValue);
+        private void OnEnable() {
+            _compiler = serializedObject.FindProperty("_compiler");
+            SetCompilerTarget((Compiler) _compiler.intValue);
 
-			m_ReorderableList = new ReorderableList(serializedObject, m_Defines);
-			m_ReorderableList.drawHeaderCallback += OnDrawHeader;
-			m_ReorderableList.drawElementCallback += OnDrawListElement;
-		}
+            _reorderableList = new ReorderableList(serializedObject, _defines);
+            _reorderableList.drawHeaderCallback += OnDrawHeader;
+            _reorderableList.drawElementCallback += OnDrawListElement;
+        }
 
-		void OnDisable()
-		{
-			if (!m_IsApplied.boolValue)
-			{
-				if (EditorUtility.DisplayDialog("Unsaved Changes", "Would you like to save changes to the scripting defines?",
-					"Yes",
-					"No"))
-					ApplyDefines();
-			}
-		}
+        private void OnDisable() {
+            if (!_isApplied.boolValue) {
+                var dialog = EditorUtility.DisplayDialog(
+                    "Unsaved Changes",
+                    "Would you like to save changes to the scripting defines?",
+                    "Yes", "No");
 
-		void SetCompilerTarget(Compiler compiler)
-		{
-			m_Compiler.intValue = (int) compiler;
+                if (dialog) {
+                    ApplyDefines();
+                }
+            }
+        }
 
-			m_Defines = serializedObject.FindProperty("m_Defines");
-			m_IsApplied = serializedObject.FindProperty("m_IsApplied");
+        private void SetCompilerTarget(Compiler compiler) {
+            _compiler.intValue = (int) compiler;
 
-			if (m_Compiler.intValue == (int) Compiler.Platform)
-			{
-				m_BuildTarget = serializedObject.FindProperty("m_BuildTarget");
-				m_CurrentTargetGroup = (BuildTargetGroup) m_BuildTarget.intValue;
+            _defines = serializedObject.FindProperty("_defines");
+            _isApplied = serializedObject.FindProperty("_isApplied");
 
-				SetBuildTarget(m_CurrentTargetGroup == BuildTargetGroup.Unknown
-					? BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget)
-					: m_CurrentTargetGroup);
-			}
-			else
-			{
-				var defs = GlobalDefineUtility.GetDefines((Compiler) m_Compiler.intValue);
+            if (_compiler.intValue == (int) Compiler.Platform) {
+                _buildTarget = serializedObject.FindProperty("_buildTarget");
+                _currentTargetGroup = (BuildTargetGroup) _buildTarget.intValue;
 
-				m_Defines.arraySize = defs.Length;
+                SetBuildTarget(_currentTargetGroup == BuildTargetGroup.Unknown
+                    ? BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget)
+                    : _currentTargetGroup);
+            } else {
+                var defs = GlobalDefineUtility.GetDefines((Compiler) _compiler.intValue);
 
-				for (int i = 0; i < defs.Length; i++)
-					m_Defines.GetArrayElementAtIndex(i).stringValue = defs[i];
+                _defines.arraySize = defs.Length;
 
-				m_IsApplied.boolValue = true;
-				serializedObject.ApplyModifiedProperties();
-			}
-		}
+                for (var i = 0; i < defs.Length; i++) {
+                    _defines.GetArrayElementAtIndex(i).stringValue = defs[i];
+                }
 
-		void SetBuildTarget(BuildTargetGroup target)
-		{
-			m_CurrentTargetGroup = target;
-			m_BuildTarget.intValue = (int) target;
+                _isApplied.boolValue = true;
+                serializedObject.ApplyModifiedProperties();
+            }
+        }
 
-			var defs = GetScriptingDefineSymbols((BuildTargetGroup) m_BuildTarget.enumValueIndex);
-			m_Defines.arraySize = defs.Length;
-			for (int i = 0; i < defs.Length; i++)
-				m_Defines.GetArrayElementAtIndex(i).stringValue = defs[i];
+        private void SetBuildTarget(BuildTargetGroup target) {
+            _currentTargetGroup = target;
+            _buildTarget.intValue = (int) target;
 
-			m_IsApplied.boolValue = true;
-			serializedObject.ApplyModifiedProperties();
-		}
+            var defs = GetScriptingDefineSymbols((BuildTargetGroup) _buildTarget.enumValueIndex);
+            _defines.arraySize = defs.Length;
+            
+            for (var i = 0; i < defs.Length; i++) {
+                _defines.GetArrayElementAtIndex(i).stringValue = defs[i];
+            }
 
-		static string[] GetScriptingDefineSymbols(BuildTargetGroup group)
-		{
-			string res = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
-			return res.Split(';');
-		}
+            _isApplied.boolValue = true;
+            serializedObject.ApplyModifiedProperties();
+        }
 
-		void ApplyDefines()
-		{
-			string[] arr = new string[m_Defines.arraySize];
+        private static string[] GetScriptingDefineSymbols(BuildTargetGroup group) {
+            var res = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
+            return res.Split(';');
+        }
 
-			for (int i = 0, c = arr.Length; i < c; i++)
-				arr[i] = m_Defines.GetArrayElementAtIndex(i).stringValue;
+        private void ApplyDefines() {
+            var arr = new string[_defines.arraySize];
 
-			if(m_Compiler.intValue == (int) Compiler.Platform)
-				PlayerSettings.SetScriptingDefineSymbolsForGroup(m_CurrentTargetGroup, string.Join(";", arr));
-			else
-				GlobalDefineUtility.SetDefines((Compiler) m_Compiler.intValue, arr);
+            for (int i = 0, c = arr.Length; i < c; i++) {
+                arr[i] = _defines.GetArrayElementAtIndex(i).stringValue;
+            }
 
-			m_IsApplied.boolValue = true;
+            if (_compiler.intValue == (int) Compiler.Platform) {
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(_currentTargetGroup, string.Join(";", arr));
+            } else {
+                GlobalDefineUtility.SetDefines((Compiler) _compiler.intValue, arr);
+            }
 
-			serializedObject.ApplyModifiedProperties();
+            _isApplied.boolValue = true;
 
-			GUI.FocusControl("");
-		}
+            serializedObject.ApplyModifiedProperties();
 
-		void OnDrawHeader(Rect rect)
-		{
-			var cur = ((Compiler) m_Compiler.intValue).ToString();
+            GUI.FocusControl("");
+        }
 
-			if (m_Compiler.intValue == (int) Compiler.Platform)
-				cur += " " + ((BuildTargetGroup) (m_BuildTarget.intValue));
+        private void OnDrawHeader(Rect rect) {
+            var cur = ((Compiler) _compiler.intValue).ToString();
 
-			GUI.Label(rect, cur.ToString(), EditorStyles.boldLabel);
-		}
+            if (_compiler.intValue == (int) Compiler.Platform) {
+                cur += " " + (BuildTargetGroup) _buildTarget.intValue;
+            }
 
-		void OnDrawListElement(Rect rect, int index, bool isactive, bool isfocused)
-		{
-			var element = m_ReorderableList.serializedProperty.GetArrayElementAtIndex(index);
+            GUI.Label(rect, cur, EditorStyles.boldLabel);
+        }
 
-			EditorGUIUtility.labelWidth = 4;
-			EditorGUI.PropertyField(new Rect(rect.x, rect.y + 2, rect.width, EditorGUIUtility.singleLineHeight), element);
-			EditorGUIUtility.labelWidth = 0;
-		}
+        private void OnDrawListElement(Rect rect, int index, bool isactive, bool isfocused) {
+            var element = _reorderableList.serializedProperty.GetArrayElementAtIndex(index);
 
-		public override void OnInspectorGUI()
-		{
-			Styles.Init();
+            EditorGUIUtility.labelWidth = 4;
+            EditorGUI.PropertyField(new Rect(rect.x, rect.y + 2, rect.width, EditorGUIUtility.singleLineHeight), element);
+            EditorGUIUtility.labelWidth = 0;
+        }
 
-			serializedObject.Update();
+        public override void OnInspectorGUI() {
+            Styles.Init();
 
-			Color oldColor = GUI.backgroundColor;
+            serializedObject.Update();
 
-			GUILayout.Space(2);
+            var oldColor = GUI.backgroundColor;
 
-			GUILayout.BeginHorizontal();
+            GUILayout.Space(2);
 
-			for (int i = 0; i < k_CompilerCount; i++)
-			{
-				if (i == m_Compiler.intValue)
-					GUI.backgroundColor = Color.gray;
+            GUILayout.BeginHorizontal();
 
-				GUIStyle st;
-				switch (i)
-				{
-					case 0:
-						st = EditorStyles.miniButtonLeft;
-						break;
-					case k_CompilerCount - 1:
-						st = EditorStyles.miniButtonRight;
-						break;
-					default:
-						st = EditorStyles.miniButtonMid;
-						break;
-				}
+            for (var i = 0; i < COMPILER_COUNT; i++) {
+                if (i == _compiler.intValue) {
+                    GUI.backgroundColor = Color.gray;
+                }
 
-				if (GUILayout.Button(((Compiler) i).ToString(), st))
-				{
-					m_Compiler.intValue = i;
-					SetCompilerTarget((Compiler) i);
-				}
+                GUIStyle st;
+                switch (i) {
+                    case 0:
+                        st = EditorStyles.miniButtonLeft;
+                        break;
+                    case COMPILER_COUNT - 1:
+                        st = EditorStyles.miniButtonRight;
+                        break;
+                    default:
+                        st = EditorStyles.miniButtonMid;
+                        break;
+                }
 
-				GUI.backgroundColor = oldColor;
-			}
+                if (GUILayout.Button(((Compiler) i).ToString(), st)) {
+                    _compiler.intValue = i;
+                    SetCompilerTarget((Compiler) i);
+                }
 
-			GUILayout.EndHorizontal();
+                GUI.backgroundColor = oldColor;
+            }
 
-			if (m_Compiler.intValue == (int) Compiler.Platform)
-			{
-				var cur = ((BuildTargetGroup) (m_BuildTarget.intValue));
+            GUILayout.EndHorizontal();
 
-				GUILayout.Space(3);
+            if (_compiler.intValue == (int) Compiler.Platform) {
+                var cur = (BuildTargetGroup) _buildTarget.intValue;
 
-				EditorGUI.BeginChangeCheck();
-				cur = (BuildTargetGroup) EditorGUILayout.EnumPopup(cur);
-				if (EditorGUI.EndChangeCheck())
-					SetBuildTarget(cur);
-			}
+                GUILayout.Space(3);
 
-			EditorGUI.BeginChangeCheck();
+                EditorGUI.BeginChangeCheck();
+                cur = (BuildTargetGroup) EditorGUILayout.EnumPopup(cur);
+                
+                if (EditorGUI.EndChangeCheck()) {
+                    SetBuildTarget(cur);
+                }
+            }
 
-			GUILayout.BeginVertical(Styles.listContainer);
+            EditorGUI.BeginChangeCheck();
 
-			m_ReorderableList.DoLayoutList();
-			if (EditorGUI.EndChangeCheck())
-				m_IsApplied.boolValue = false;
+            GUILayout.BeginVertical(Styles.listContainer);
 
-			GUILayout.EndVertical();
+            _reorderableList.DoLayoutList();
+            
+            if (EditorGUI.EndChangeCheck()) {
+                _isApplied.boolValue = false;
+            }
 
-			GUILayout.BeginHorizontal();
+            GUILayout.EndVertical();
 
-			GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
 
-			bool wasEnabled = GUI.enabled;
+            GUILayout.FlexibleSpace();
 
-			GUI.enabled = !m_IsApplied.boolValue;
+            var wasEnabled = GUI.enabled;
 
-			if (GUILayout.Button("Apply", EditorStyles.miniButton))
-				ApplyDefines();
+            GUI.enabled = !_isApplied.boolValue;
 
-			GUI.enabled = wasEnabled;
+            if (GUILayout.Button("Apply", EditorStyles.miniButton)) {
+                ApplyDefines();
+            }
 
-			GUILayout.EndHorizontal();
+            GUI.enabled = wasEnabled;
 
-			serializedObject.ApplyModifiedProperties();
-		}
-	}
+            GUILayout.EndHorizontal();
+
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
 }
