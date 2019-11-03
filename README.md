@@ -18,7 +18,7 @@ These are specific to the targeted platform, and Editor.
 ## Install
 
 - Open `Packages/manifest.json`
-- Add `"com.karl.define-manager": "https://github.com/karl-/UnityDefineManager.git"` to dependencies
+- Add `"me.caneva20.unitydefinemanager": "https://github.com/caneva20/UnityDefineManager.git"` to dependencies
 
 
 ## Quick Start
