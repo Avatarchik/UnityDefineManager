@@ -1,26 +1,51 @@
-UnityDefineManager
+Unity Define Manager
 ==================
 
 Easily manage global and platform-specific defines in Unity.
 
-![](define-manager.png?raw=true)
+![](https://raw.githubusercontent.com/caneva20/UnityDefineManager/master/screenshot.png)
 
-![](platform-defines.png?raw=true)
+## Defines
+**CSharp**: These are applied for all Runtime scripts
 
-**Global Defines**
+**Editor**: These are applied for all Editor scripts
 
-These are applied for all Runtime scripts, or all Editor scripts.
-
-**Platform Defines**
-
-These are specific to the targeted platform, and Editor.
+**Platform Defines**: These are specific to the targeted platform, and Editor.
 
 ## Install
+Use [UpmGitExtension](https://github.com/mob-sakai/UpmGitExtension) (Recommended/Easier)
 
-- Open `Packages/manifest.json`
-- Add `"me.caneva20.unitydefinemanager": "https://github.com/caneva20/UnityDefineManager.git"` to dependencies
+**Or**
 
+Find `Packages/manifest.json` in your project and edit it to look like this:
+```json
+{
+  "dependencies": {
+    "me.caneva20.unitydefinemanager": "https://github.com/caneva20/UnityDefineManager.git#0.1.0-preview.1",
+    ...
+  },
+}
+```
 
 ## Quick Start
 
-- Open `Window/Platform Defines` or `Window/Global Defines`
+**Editor**
+
+- Open `Window/Unity Define Manager`
+
+**Scripting**
+```CSharp
+//Add new Runtime Define
+GlobalDefineUtility.AddDefine(Compiler.CSharp, "RUNTIME_DEFINE_NAME");
+
+//Add new Editor Define
+GlobalDefineUtility.AddDefine(Compiler.Editor, "EDITOR_DEFINE_NAME");
+
+
+
+//Remove new Runtime Define
+GlobalDefineUtility.RemoveDefine(Compiler.CSharp, "RUNTIME_DEFINE_NAME");
+
+//Remove new Editor Define
+GlobalDefineUtility.RemoveDefine(Compiler.Editor, "EDITOR_DEFINE_NAME");
+```
