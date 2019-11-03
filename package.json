@@ -1,9 +1,6 @@
 {
-	"name": "com.karl.define-manager",
+	"name": "me.caneva20.unitydefinemanager",
 	"displayName":"Define Manager",
 	"version": "0.1.0-preview",
-	"unity": "2018.1",
-	"description": "",
-	"dependencies": {
-	}
+	"unity": "2018.1"
 }
