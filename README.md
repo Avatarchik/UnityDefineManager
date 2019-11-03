@@ -21,7 +21,7 @@ Find `Packages/manifest.json` in your project and edit it to look like this:
 ```json
 {
   "dependencies": {
-    "me.caneva20.unitydefinemanager": "https://github.com/caneva20/UnityDefineManager.git#0.1.0-preview.1",
+    "caneva20.unitydefinemanager": "https://github.com/caneva20/UnityDefineManager.git#0.1.01-preview",
     ...
   },
 }
