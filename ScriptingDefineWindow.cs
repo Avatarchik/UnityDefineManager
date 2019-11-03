@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace caneva20.UnityDefineManager.Editor {
+namespace caneva20.UnityDefineManager {
     public class ScriptingDefineWindow : EditorWindow {
         private ScriptingDefineObject _asset;
 

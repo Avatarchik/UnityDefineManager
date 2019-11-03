@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace caneva20.UnityDefineManager.Editor {
+namespace caneva20.UnityDefineManager {
     [CustomEditor(typeof(ScriptingDefineObject))]
     public class ScriptingDefineEditor : UnityEditor.Editor {
         private const int COMPILER_COUNT = 3;

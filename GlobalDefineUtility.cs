@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEditor;
 
-namespace caneva20.UnityDefineManager.Editor {
+namespace caneva20.UnityDefineManager {
     public static class GlobalDefineUtility {
         // http://forum.unity3d.com/threads/93901-global-define/page2
         // Do not modify these paths
